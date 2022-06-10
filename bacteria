@@ -1,0 +1,72 @@
+import numpy as np
+
+class nutrient:
+    def __init__(self,x,y,n):
+        self.x=x
+        self.y=y
+        self.n=n
+    def eaten(self):
+        self.n=self.n-1
+        
+class bacteria:
+    def __init__(self,x,y,F,steptaken):#position of nutrient and number of steps
+        self.x=x
+        self.y=y
+        self.F=F 
+        self.steptaken=steptaken
+    def move(self):
+        direction_choice = ['right','left', 'down','up']
+        if self.F== 'random':
+            self.F=np.random.choice(direction_choice)
+        if self.F =='right':
+            self.x=self.x+1 
+        if self.F =='left':
+            self.x=self.x-1
+        if self.F =='up':
+            self.y=self.y+1
+        if self.F =='down':
+            self.y=self.y-1
+
+class Map:
+    def __init__(self,nn,mm):
+        self.nn =nn   #map    
+        self.mm =mm
+        self.m=np.zeros((self.nn,self.mm))  
+        
+    def update(self,x,y,nx,ny,n):
+        self.m=np.zeros((self.nn,self.mm))  
+        self.m[x][y]=-50
+        self.m[nx][ny]=n
+
+def distance(x1,y1,x2,y2):
+    d=np.sqrt((x1-x2)**2+(y1-y2)**2)
+    return d
+
+def singlestep(bacteria,nutrient):
+    x1,y1=bacteria.x,bacteria.y
+    x2,y2=nutrient.x,nutrient.y
+    d1=distance(x1,y1,x2,y2)
+    bacteria.move()
+    x1,y1=bacteria.x,bacteria.y
+    d2=distance(x1,y1,x2,y2)
+    if d1<d2:
+        bacteria.F='random'
+    if d2<=np.sqrt(2):
+        nutrient.eaten()
+    if nutrient.n==0:
+        nutrient.x,nutrient.y=0,0  # need to remove nutrient
+        
+map_ = Map(100,100)   
+f1=nutrient(45,45,50)    
+b1=bacteria(12,75,'random',0)        
+
+import matplotlib.pyplot as plt
+nsteps=200
+for i in range(nsteps):
+    singlestep(b1,f1)
+    map_.update(b1.x,b1.y,f1.x,f1.y,f1.n)
+    plt.title(i)
+    plt.imshow(map_.m,cmap=plt.cm.gray)
+    plt.pause(0.1)
+    if i!=nsteps-1:
+        plt.clf()
